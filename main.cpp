@@ -3,6 +3,12 @@
 
 const double MICRO = 1e-6;
 const double DR = 64.0 / 3;
+const int QUERY_LENGTH = 22;
+const int QREP_LENGTH = 4;
+const int ACK_LENGTH = 18;
+const int REQ_RN_LENGTH = 40;
+const int READ_LENGTH = 58;
+
 
 std::tuple<double, double, double, double, double> getVariablesFromTari(double tari)
 {
@@ -43,6 +49,18 @@ std::tuple<double, double, int> getPreamble(double tari, double rtcal, double tr
         }
     }
     return std::make_tuple(tSyncPreamble, tFullPreamble, tagPreambleLen);
+}
+
+std::tuple<double, double, double, double, double> getDurationFromReader(double readerBitrate,
+                                                                         double tFullPreamble,
+                                                                         double tSyncPreamble)
+{
+    double tQuery = (QUERY_LENGTH / readerBitrate) + tFullPreamble;
+    double tQRep = (QREP_LENGTH / readerBitrate) + tSyncPreamble;
+    double tAck = (ACK_LENGTH / readerBitrate) + tSyncPreamble;
+    double tReqRn = (REQ_RN_LENGTH / readerBitrate) + tSyncPreamble;
+    double tRead = (READ_LENGTH / readerBitrate) + tSyncPreamble;
+    return std::make_tuple(tQuery, tQRep, tAck, tReqRn, tRead);
 }
 
 int main() {
