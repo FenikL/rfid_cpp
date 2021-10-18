@@ -1,9 +1,17 @@
 #include <iostream>
 #include <tuple>
 #include <cmath>
+#include <vector>
+
+
+const int NUM_TAGS = 30;
+const double INTERVAL = 1.0;
+const double AREA_LENGTH = 12.0;
 
 const double MICRO = 1e-6;
+
 const double DR = 64.0 / 3;
+
 const int QUERY_LENGTH = 22;
 const int QREP_LENGTH = 4;
 const int ACK_LENGTH = 18;
@@ -88,6 +96,26 @@ std::tuple<double, double, double, double> getProbabilitySuccessMessage(double b
     return std::make_tuple(rn16, epcid, newRn16, tid);
 }
 
+std::tuple<double, std::vector<double>,  std::vector<double>> getVariablesForTimes(double velocity)
+{
+    std::vector<double> timeEnter(NUM_TAGS);
+    std::vector<double> timeExit(NUM_TAGS);
+
+    double totalDuration = INTERVAL*(NUM_TAGS - 1) + AREA_LENGTH/velocity;
+
+    for (int tag = 0; tag < NUM_TAGS; tag++)
+    {
+        timeEnter[tag] = INTERVAL * tag;
+    }
+
+    for (int tag = 0; tag < NUM_TAGS; tag++)
+    {
+        timeExit[tag] = (AREA_LENGTH/velocity) + timeEnter[tag];
+    }
+
+    return std::make_tuple(totalDuration, timeEnter, timeExit);
+}
+
 int main() {
     auto [ trcal, rtcal, blf, t1_and_t2, t1_and_t3 ] = getVariablesFromTari(6.25);
     std::cout << "trcal=" << trcal << ", "
@@ -95,4 +123,18 @@ int main() {
               << "blf= " << blf << ", "
               << "t1_and_t2= " << t1_and_t2 << ", "
               << "t1_and_t3= " << t1_and_t3 << '\n';
+
+    auto [ totalDuration, timeEnter, timeExit ] = getVariablesForTimes(30.0);
+    std::cout << "Total duration = " << totalDuration << '\n';
+
+    for (int tag = 0; tag < NUM_TAGS; tag++)
+    {
+        std::cout << "TimeEnter[" << tag << "]="
+                  << timeEnter[tag] << "\n";
+    }
+    for (int tag = 0; tag < NUM_TAGS; tag++)
+    {
+        std::cout << "TimeExit[" << tag << "]="
+                  << timeExit[tag] << "\n";
+    }
 }
