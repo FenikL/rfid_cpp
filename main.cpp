@@ -8,6 +8,10 @@ const int QREP_LENGTH = 4;
 const int ACK_LENGTH = 18;
 const int REQ_RN_LENGTH = 40;
 const int READ_LENGTH = 58;
+const int RN16_LENGTH = 16;
+const int NEW_RN16_LENGTH = 32;
+const int EPCID_LENGTH = 128;
+const int TID_LENGTH = 97;
 
 
 std::tuple<double, double, double, double, double> getVariablesFromTari(double tari)
@@ -62,6 +66,18 @@ std::tuple<double, double, double, double, double> getDurationFromReader(double 
     double tRead = (READ_LENGTH / readerBitrate) + tSyncPreamble;
     return std::make_tuple(tQuery, tQRep, tAck, tReqRn, tRead);
 }
+
+std::tuple<double, double, double, double> getDurationFromTag(double tagPreambleLen,
+                                                              double tagBitrate)
+{
+    double tRn16 = (RN16_LENGTH + tagPreambleLen + 1) / tagBitrate;
+    double tNewRn16 = (NEW_RN16_LENGTH + tagPreambleLen + 1) / tagBitrate;
+    double tEpcId = (EPCID_LENGTH + tagPreambleLen + 1) / tagBitrate;
+    double tTid = (TID_LENGTH + tagPreambleLen + 1) / tagBitrate;
+    return std::make_tuple(tRn16, tNewRn16, tEpcId, tTid);
+}
+
+std::tuple<double, double, double, double, double, double> getDurationEvent(std::tu)
 
 int main() {
     auto [ trcal, rtcal, blf, t1_and_t2, t1_and_t3 ] = getVariablesFromTari(6.25);
