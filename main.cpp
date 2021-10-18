@@ -1,5 +1,6 @@
 #include <iostream>
 #include <tuple>
+#include <cmath>
 
 const double MICRO = 1e-6;
 const double DR = 64.0 / 3;
@@ -75,6 +76,16 @@ std::tuple<double, double, double, double> getDurationFromTag(double tagPreamble
     double tEpcId = (EPCID_LENGTH + tagPreambleLen + 1) / tagBitrate;
     double tTid = (TID_LENGTH + tagPreambleLen + 1) / tagBitrate;
     return std::make_tuple(tRn16, tNewRn16, tEpcId, tTid);
+}
+
+std::tuple<double, double, double, double> getProbabilitySuccessMessage(double ber)
+{
+    double x = 1 - ber;
+    double rn16 = pow(x, RN16_LENGTH);
+    double epcid = pow(x, EPCID_LENGTH);
+    double newRn16 = pow(x, NEW_RN16_LENGTH);
+    double tid = pow(x, TID_LENGTH);
+    return std::make_tuple(rn16, epcid, newRn16, tid);
 }
 
 int main() {
