@@ -77,8 +77,6 @@ std::tuple<double, double, double, double> getDurationFromTag(double tagPreamble
     return std::make_tuple(tRn16, tNewRn16, tEpcId, tTid);
 }
 
-std::tuple<double, double, double, double, double, double> getDurationEvent(std::tu)
-
 int main() {
     auto [ trcal, rtcal, blf, t1_and_t2, t1_and_t3 ] = getVariablesFromTari(6.25);
     std::cout << "trcal=" << trcal << ", "
