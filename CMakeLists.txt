@@ -3,4 +3,4 @@ project(rfid)
 
 set(CMAKE_CXX_STANDARD 20)
 
-add_executable(rfid main.cpp variables.cpp variables.h)
+add_executable(rfid main.cpp variables.cpp variables.h inderectVariables.cpp inderectVariables.h)
