@@ -19,10 +19,11 @@ std::tuple<std::list<int>, std::vector<int>> getTagsInArea(double time, std::vec
             break;
         }
 
-        if (timeEnter[tag] <= time < timeExit[tag])
+        if ((timeEnter[tag] <= time) and (time < timeExit[tag]))
         {
             tagsInArea.push_back(tag);
-            numRoundsPerTag[tag]++;
+        /* std::cout << timeEnter[tag] << "<=" << time << "<" << timeExit[tag] << "\n"; */
+            ++numRoundsPerTag[tag];
         }
 
         if (time >= timeExit[tag])
@@ -64,7 +65,7 @@ int main() {
             << ", tSuccessTid=" << tSuccessTid << "\n";
 
 */
-    auto [ totalDuration, timeEnter, timeExit] = getVariablesForTimes(30);
+    auto [ totalDuration, timeEnter, timeExit] = getVariablesForTimes(10);
 
     std::list<int> listOfTags;
     for (int i = 0; i < NUM_TAGS; ++i)
