@@ -1,6 +1,3 @@
-//
-// Created by user on 19.10.2021.
-//
 #include <iostream>
 #include <tuple>
 #include "inderectVariables.h"

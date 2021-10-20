@@ -1,7 +1,3 @@
-//
-// Created by user on 19.10.2021.
-//
-
 #ifndef RFID_INDERECTVARIABLES_H
 #define RFID_INDERECTVARIABLES_H
 #include <tuple>

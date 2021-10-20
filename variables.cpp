@@ -1,51 +1,72 @@
-//
-// Created by user on 18.10.2021.
-//
-
 #include "variables.h"
 #include <tuple>
 #include <cmath>
 #include <vector>
 
-std::tuple<double, double, double, double, double> getVariablesFromTari(double tari) noexcept
+struct VariablesFromTari
 {
-    double trcal = 3 * tari * MICRO;
-    double rtcal = 2 * tari * MICRO;
-    double blf = DR / trcal;
-    double tpri = 1 / blf;
-    double RtcalOrTpri = std::max(rtcal, 10*tpri);
-    double t1Andt2 = 1.1*RtcalOrTpri + 2*MICRO + 20*tpri;
-    double t1Andt3 = 2 * 1.1 * RtcalOrTpri;
-    return std::make_tuple(trcal, rtcal, blf, t1Andt2, t1Andt3);
+    double trcal;
+    double rtcal;
+    double blf;
+    double t1_and_t2;
+    double t1_and_t3;
+};
+
+VariablesFromTari GetVariablesFromTari(double tari)
+{
+    VariablesFromTari variable{};
+    variable.trcal = 3 * tari * Micro;
+    variable.rtcal = 2 * tari * Micro;
+    variable.blf = DR / variable.trcal;
+    double tpri = 1 / variable.blf;
+    double rtcal_or_tpri = std::max(variable.rtcal, 10*tpri);
+    variable.t1_and_t2 = 1.1*rtcal_or_tpri + 2*Micro + 20*tpri;
+    variable.t1_and_t3 = 2 * 1.1 * rtcal_or_tpri;
+    return variable;
 }
 
-std::tuple<double, double> getBitrate(double rtcal, double blf, int symPerBit)
+struct Bitrate
 {
-    double readerBitrate = 2 / rtcal;
-    double tagBitrate = blf / symPerBit;
-    return std::make_tuple(readerBitrate, tagBitrate);
+    double reader;
+    double tag;
+};
+
+Bitrate GetBitrate(double rtcal, double blf, int sym_per_bit)
+{
+    Bitrate bitrate{};
+    bitrate.reader = 2 / rtcal;
+    bitrate.tag = blf / sym_per_bit;
+    return {bitrate};
 }
 
-std::tuple<double, double, int> getPreamble(double tari, double rtcal, double trcal,
-                                            int trext, int symPerBit)
+struct Preamble
 {
-    int tagPreambleLen;
-    double tSyncPreamble = MICRO*(12.5 + tari) + rtcal;
-    double tFullPreamble = tSyncPreamble + trcal;
+    double t_sync;
+    double t_full;
+    int tag_length;
+};
+
+Preamble GetPreamble(double tari, double rtcal, double trcal,
+                     int trext, int sym_per_bit)
+{
+    Preamble preamble{};
+    preamble.t_sync = Micro*(12.5 + tari) + rtcal;
+    preamble.t_full = preamble.t_sync + trcal;
+
     if (trext == 0) {
-        if (symPerBit == 1) {
-            tagPreambleLen = 6;
+        if (sym_per_bit == 1) {
+            preamble.tag_length = 6;
         } else {
-            tagPreambleLen = 10;
+            preamble.tag_length = 10;
         }
     } else {
-        if (symPerBit == 1) {
-            tagPreambleLen = 18;
+        if (sym_per_bit == 1) {
+            preamble.tag_length = 18;
         } else {
-            tagPreambleLen = 22;
+            preamble.tag_length = 22;
         }
     }
-    return std::make_tuple(tSyncPreamble, tFullPreamble, tagPreambleLen);
+    return preamble;
 }
 
 std::tuple<double, double, double, double, double> getDurationFromReader(double readerBitrate,

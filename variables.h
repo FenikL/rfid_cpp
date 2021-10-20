@@ -1,29 +1,25 @@
-//
-// Created by user on 18.10.2021.
-//
-
 #ifndef RFID_VARIABLES_H
 #define RFID_VARIABLES_H
 #include <tuple>
 #include <vector>
 
-const int NUM_TAGS = 30;
-const double INTERVAL = 1.0;
-const double AREA_LENGTH = 12.0;
+const int NumTags = 30;
+const double Interval = 1.0;
+const double AreaLength = 12.0;
 
-const double MICRO = 1e-6;
+const double Micro = 1e-6;
 
 const double DR = 64.0 / 3;
 
-const int QUERY_LENGTH = 22;
-const int QREP_LENGTH = 4;
-const int ACK_LENGTH = 18;
-const int REQ_RN_LENGTH = 40;
-const int READ_LENGTH = 58;
-const int RN16_LENGTH = 16;
-const int NEW_RN16_LENGTH = 32;
-const int EPCID_LENGTH = 128;
-const int TID_LENGTH = 97;
+const int QuertLength = 22;
+const int QrepLength = 4;
+const int AckLength = 18;
+const int ReqRnLength = 40;
+const int ReadLength = 58;
+const int Rn16Length = 16;
+const int NewRn16Length = 32;
+const int EpcIdLength = 128;
+const int TidLength = 97;
 
 std::tuple<double, double, double, double, double> getVariablesFromTari(double tari) noexcept;
 std::tuple<double, double> getBitrate(double rtcal, double blf, int symPerBit);
