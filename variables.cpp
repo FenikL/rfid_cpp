@@ -1,5 +1,4 @@
 #include "variables.h"
-#include <tuple>
 #include <cmath>
 #include <vector>
 
@@ -69,54 +68,88 @@ Preamble GetPreamble(double tari, double rtcal, double trcal,
     return preamble;
 }
 
-std::tuple<double, double, double, double, double> getDurationFromReader(double readerBitrate,
-                                                                         double tFullPreamble,
-                                                                         double tSyncPreamble)
+struct DurationFromReader
 {
-    double tQuery = (QUERY_LENGTH / readerBitrate) + tFullPreamble;
-    double tQRep = (QREP_LENGTH / readerBitrate) + tSyncPreamble;
-    double tAck = (ACK_LENGTH / readerBitrate) + tSyncPreamble;
-    double tReqRn = (REQ_RN_LENGTH / readerBitrate) + tSyncPreamble;
-    double tRead = (READ_LENGTH / readerBitrate) + tSyncPreamble;
-    return std::make_tuple(tQuery, tQRep, tAck, tReqRn, tRead);
+    double query;
+    double qrep;
+    double ack;
+    double req_rn;
+    double read;
+};
+
+DurationFromReader GetDurationFromReader(double reader_bitrate,
+                                         double t_full_preamble,
+                                         double t_sync_preamble)
+{
+    DurationFromReader duration{};
+    duration.query = (QueryLength / reader_bitrate) + t_full_preamble;
+    duration.qrep = (QrepLength / reader_bitrate) + t_sync_preamble;
+    duration.ack = (AckLength / reader_bitrate) + t_sync_preamble;
+    duration.req_rn = (ReqRnLength / reader_bitrate) + t_sync_preamble;
+    duration.read = (ReadLength / reader_bitrate) + t_sync_preamble;
+    return duration;
 }
 
-std::tuple<double, double, double, double> getDurationFromTag(double tagPreambleLen,
-                                                              double tagBitrate)
+struct DurationFromTag
 {
-    double tRn16 = (RN16_LENGTH + tagPreambleLen + 1) / tagBitrate;
-    double tNewRn16 = (NEW_RN16_LENGTH + tagPreambleLen + 1) / tagBitrate;
-    double tEpcId = (EPCID_LENGTH + tagPreambleLen + 1) / tagBitrate;
-    double tTid = (TID_LENGTH + tagPreambleLen + 1) / tagBitrate;
-    return std::make_tuple(tRn16, tNewRn16, tEpcId, tTid);
+    double rn16;
+    double new_rn16;
+    double epcid;
+    double tid;
+};
+
+DurationFromTag GetDurationFromTag(double tag_preamble_len, double tag_bitrate)
+{
+    DurationFromTag duration{};
+    duration.rn16 = (Rn16Length + tag_preamble_len + 1) / tag_bitrate;
+    duration.new_rn16 = (NewRn16Length + tag_preamble_len + 1) / tag_bitrate;
+    duration.epcid = (EpcidLength + tag_preamble_len + 1) / tag_bitrate;
+    duration.tid = (TidLength + tag_preamble_len + 1) / tag_bitrate;
+    return duration;
 }
 
-std::tuple<double, double, double, double> getProbabilitySuccessMessage(double ber)
+struct ProbabilitySuccessMessage
+{
+    double rn16;
+    double new_rn16;
+    double epcid;
+    double tid;
+};
+
+ProbabilitySuccessMessage GetProbabilitySuccessMessage(double ber)
 {
     double x = 1 - ber;
-    double rn16 = pow(x, RN16_LENGTH);
-    double epcid = pow(x, EPCID_LENGTH);
-    double newRn16 = pow(x, NEW_RN16_LENGTH);
-    double tid = pow(x, TID_LENGTH);
-    return std::make_tuple(rn16, epcid, newRn16, tid);
+    ProbabilitySuccessMessage probability{};
+    probability.rn16 = pow(x, Rn16Length);
+    probability.new_rn16 = pow(x, NewRn16Length);
+    probability.epcid = pow(x, EpcidLength);
+    probability.tid = pow(x, TidLength);
+    return probability;
 }
 
-std::tuple<double, std::vector<double>,  std::vector<double>> getVariablesForTimes(double velocity)
+struct VariablesForTimes
 {
-    std::vector<double> timeEnter(NUM_TAGS);
-    std::vector<double> timeExit(NUM_TAGS);
+    double total_duration;
+    std::vector<double> time_enter;
+    std::vector<double> time_exit;
+};
 
-    double totalDuration = INTERVAL*(NUM_TAGS - 1) + AREA_LENGTH/velocity;
+VariablesForTimes GetVariablesForTimes(double velocity)
+{
+    VariablesForTimes variable{};
+    variable.time_enter = std::vector<double>(NumTags);
+    variable.time_exit = std::vector<double>(NumTags);
+    variable.total_duration = Interval*(NumTags - 1) + AreaLength/velocity;
 
-    for (int tag = 0; tag < NUM_TAGS; tag++)
+    for (int tag = 0; tag < NumTags; ++tag)
     {
-        timeEnter[tag] = INTERVAL * tag;
+        variable.time_enter[tag] = Interval * tag;
     }
 
-    for (int tag = 0; tag < NUM_TAGS; tag++)
+    for (int tag = 0; tag < NumTags; ++tag)
     {
-        timeExit[tag] = (AREA_LENGTH/velocity) + timeEnter[tag];
+        variable.time_exit[tag] = (AreaLength/velocity) + variable.time_enter[tag];
     }
 
-    return std::make_tuple(totalDuration, timeEnter, timeExit);
+    return variable;
 }
