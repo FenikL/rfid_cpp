@@ -5,85 +5,64 @@
 #include "inderectVariables.h"
 
 
-std::tuple<std::list<int>, std::vector<int>> getTagsInArea(double time, std::vector<double> timeEnter,
-                                                             std::vector<double> timeExit,
-                                                             std::list<int> listOfTags,
-                                                             std::vector<int> numRoundsPerTag)
+struct TagsInArea
 {
-    std::list<int> tagsInArea;
-    bool deleteFirst = false;
-    for (int tag : listOfTags)
+    std::list<int> tags_in_area;
+    std::vector<int> num_rounds_per_tag;
+};
+
+TagsInArea GetTagsInArea(double time, std::vector<double> time_enter, std::vector<double> time_exit,
+                         std::list<int> list_of_tags, std::vector<int> num_rounds_per_tag)
+{
+    TagsInArea list{};
+    bool delete_first = false;
+    for (int tag : list_of_tags)
     {
-        if (time < timeEnter[tag])
+        if (time < time_enter[tag])
         {
             break;
         }
 
-        if ((timeEnter[tag] <= time) and (time < timeExit[tag]))
+        if ((time_enter[tag] <= time) and (time < time_exit[tag]))
         {
-            tagsInArea.push_back(tag);
-        /* std::cout << timeEnter[tag] << "<=" << time << "<" << timeExit[tag] << "\n"; */
-            ++numRoundsPerTag[tag];
+            list.tags_in_area.push_back(tag);
+            /* std::cout << timeEnter[tag] << "<=" << time << "<" << timeExit[tag] << "\n"; */
+            /* ++list.num_rounds_per_tag[tag]; */
         }
 
-        if (time >= timeExit[tag])
+        if (time >= time_exit[tag])
         {
-            deleteFirst = true;
+            delete_first = true;
         }
     }
-    if (deleteFirst)
+    if (delete_first)
     {
-        listOfTags.pop_front();
+        list_of_tags.pop_front();
     }
-    return std::make_tuple(tagsInArea, numRoundsPerTag);
+    return list;
 }
 
+
 int main() {
-    auto [ trcal, rtcal, blf, t1_and_t2, t1_and_t3 ] = getVariablesFromTari(6.25);
-    std::cout << "trcal=" << trcal << ", "
-              << "rtcal= " << rtcal << ", "
-              << "blf= " << blf << ", "
-              << "t1_and_t2= " << t1_and_t2 << ", "
-              << "t1_and_t3= " << t1_and_t3 << '\n';
-/*
-    auto [ totalDuration, timeEnter, timeExit ] = getVariablesForTimes(30.0);
-    std::cout << "Total duration = " << totalDuration << '\n';
+    VariablesForTimes variables_for_time{GetVariablesForTimes(10)};
 
-    for (int tag = 0; tag < NUM_TAGS; ++tag)
+    std::list<int> list_of_tags;
+    for (int i = 0; i < NumTags; ++i)
     {
-        std::cout << "TimeEnter[" << tag << "]="
-                  << timeEnter[tag] << "\n";
-    }
-    for (int tag = 0; tag < NUM_TAGS; ++tag)
-    {
-        std::cout << "TimeExit[" << tag << "]="
-                  << timeExit[tag] << "\n";
-    }
-
-    auto [ tSuccessSlot, tSuccessTid ] = getDurationSuccessCommands();
-    std::cout << "tSuccessSlot=" << tSuccessSlot
-            << ", tSuccessTid=" << tSuccessTid << "\n";
-
-*/
-    auto [ totalDuration, timeEnter, timeExit] = getVariablesForTimes(10);
-
-    std::list<int> listOfTags;
-    for (int i = 0; i < NUM_TAGS; ++i)
-    {
-        listOfTags.push_back(i);
+        list_of_tags.push_back(i);
     }
 
 
-    std::vector<int> numRoundsPerTag(NUM_TAGS, 0);
+    std::vector<int> num_rounds_per_tag(NumTags, 0);
 
-    int count = totalDuration / 0.01;
+    int count = variables_for_time.total_duration / 0.01;
 
     for (int i = 0; i <= count; ++i)
     {
         double time = i * 0.01;
-        auto [ tagsInArea, numRoundsPerTagReturn ] = getTagsInArea(time, timeEnter, timeExit, listOfTags, numRoundsPerTag);
+        TagsInArea list{GetTagsInArea(time, variables_for_time.time_enter, variables_for_time.time_exit, list_of_tags, num_rounds_per_tag)};
 
-        for (int v : tagsInArea)
+        for (int v : list.tags_in_area)
             std::cout << v << " ";
         std::cout << "\n";
     }

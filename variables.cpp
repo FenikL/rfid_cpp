@@ -2,14 +2,6 @@
 #include <cmath>
 #include <vector>
 
-struct VariablesFromTari
-{
-    double trcal;
-    double rtcal;
-    double blf;
-    double t1_and_t2;
-    double t1_and_t3;
-};
 
 VariablesFromTari GetVariablesFromTari(double tari)
 {
@@ -24,12 +16,6 @@ VariablesFromTari GetVariablesFromTari(double tari)
     return variable;
 }
 
-struct Bitrate
-{
-    double reader;
-    double tag;
-};
-
 Bitrate GetBitrate(double rtcal, double blf, int sym_per_bit)
 {
     Bitrate bitrate{};
@@ -37,13 +23,6 @@ Bitrate GetBitrate(double rtcal, double blf, int sym_per_bit)
     bitrate.tag = blf / sym_per_bit;
     return {bitrate};
 }
-
-struct Preamble
-{
-    double t_sync;
-    double t_full;
-    int tag_length;
-};
 
 Preamble GetPreamble(double tari, double rtcal, double trcal,
                      int trext, int sym_per_bit)
@@ -68,15 +47,6 @@ Preamble GetPreamble(double tari, double rtcal, double trcal,
     return preamble;
 }
 
-struct DurationFromReader
-{
-    double query;
-    double qrep;
-    double ack;
-    double req_rn;
-    double read;
-};
-
 DurationFromReader GetDurationFromReader(double reader_bitrate,
                                          double t_full_preamble,
                                          double t_sync_preamble)
@@ -90,14 +60,6 @@ DurationFromReader GetDurationFromReader(double reader_bitrate,
     return duration;
 }
 
-struct DurationFromTag
-{
-    double rn16;
-    double new_rn16;
-    double epcid;
-    double tid;
-};
-
 DurationFromTag GetDurationFromTag(double tag_preamble_len, double tag_bitrate)
 {
     DurationFromTag duration{};
@@ -107,14 +69,6 @@ DurationFromTag GetDurationFromTag(double tag_preamble_len, double tag_bitrate)
     duration.tid = (TidLength + tag_preamble_len + 1) / tag_bitrate;
     return duration;
 }
-
-struct ProbabilitySuccessMessage
-{
-    double rn16;
-    double new_rn16;
-    double epcid;
-    double tid;
-};
 
 ProbabilitySuccessMessage GetProbabilitySuccessMessage(double ber)
 {
@@ -126,13 +80,6 @@ ProbabilitySuccessMessage GetProbabilitySuccessMessage(double ber)
     probability.tid = pow(x, TidLength);
     return probability;
 }
-
-struct VariablesForTimes
-{
-    double total_duration;
-    std::vector<double> time_enter;
-    std::vector<double> time_exit;
-};
 
 VariablesForTimes GetVariablesForTimes(double velocity)
 {

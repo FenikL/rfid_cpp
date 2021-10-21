@@ -3,29 +3,38 @@
 #include "inderectVariables.h"
 #include "variables.h"
 
+
 double tari = 6.25;
-
-auto [ trcal, rtcal, blf, t1Andt2, t1Andt3 ] = getVariablesFromTari(tari);
-int symPerBit = 1;
-auto [ readerBitrate, tagBitrate ] = getBitrate(rtcal, blf, symPerBit);
+int sym_per_bit = 1;
 int trext = 1;
-auto [ tSyncPreamble, tFullPreamble, tagPreambleLen ] = getPreamble(tari, rtcal, trcal, trext, symPerBit);
-auto [ tQuery, tQrep, tAck, tReqRn, tRead ] = getDurationFromReader(readerBitrate, tFullPreamble,
-                                                                    tSyncPreamble);
-auto [ tRn16, tNewRn16, tEpcId, tTid ] = getDurationFromTag(tagPreambleLen, tagBitrate);
 
-std::tuple<double, double> getDurationSuccessCommands()
+
+VariablesFromTari variable_from_tari{GetVariablesFromTari(tari)};
+Bitrate bitrate{GetBitrate(variable_from_tari.rtcal, variable_from_tari.blf, sym_per_bit)};
+
+Preamble preamble{GetPreamble(tari, variable_from_tari.rtcal, variable_from_tari.trcal, trext, sym_per_bit)};
+DurationFromReader duration_from_reader{GetDurationFromReader(bitrate.reader, preamble.t_full,
+                                                                    preamble.t_sync)};
+DurationFromTag duration_from_tag{GetDurationFromTag(preamble.tag_length, bitrate.tag)};
+
+
+DurationSuccessCommands GetDurationSuccessCommands()
 {
-    double tSuccessSlot = tQrep + 2*t1Andt2 + tRn16 + tAck + tEpcId;
-    double tSuccessTid = tReqRn + 2*t1Andt2 + tNewRn16 + tRead + tTid;
-    return std::make_tuple(tSuccessSlot, tSuccessTid);
+    DurationSuccessCommands duration{};
+    duration.epc = duration_from_reader.qrep + 2*variable_from_tari.t1_and_t2 + duration_from_tag.rn16 +
+            duration_from_reader.ack + duration_from_tag.epcid;
+    duration.tid = duration_from_reader.req_rn + 2*variable_from_tari.t1_and_t2 + duration_from_tag.new_rn16 +
+            duration_from_reader.read + duration.tid;
+    return duration;
 }
 
-std::tuple<double, double, double, double> getDurationInvalidCommands()
+DurationInvalidCommands GetDurationInvalidCommands()
 {
-    double tEmptySlot = tQrep + t1Andt3;
-    double tCollidedSlot = tQrep + t1Andt2 + tRn16;
-    double tInvalidRn16 = tQrep + t1Andt2 + tRn16 + tAck + t1Andt3;
-    double tInvalidNewRn16 = tReqRn + t1Andt2 + tNewRn16;
-    return std::make_tuple(tEmptySlot, tCollidedSlot, tInvalidRn16, tInvalidNewRn16);
+    DurationInvalidCommands duration{};
+    duration.empty_slot = duration_from_reader.qrep + variable_from_tari.t1_and_t3;
+    duration.collided_slot = duration_from_reader.qrep + variable_from_tari.t1_and_t2 + duration_from_tag.rn16;
+    duration.rn16 = duration.collided_slot + duration_from_reader.ack + variable_from_tari.t1_and_t3;
+    duration.new_rn_16 = duration_from_reader.req_rn + variable_from_tari.t1_and_t2 + duration_from_tag.new_rn16;
+    return duration;
 }
+
