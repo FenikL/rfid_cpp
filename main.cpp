@@ -60,7 +60,10 @@ int main() {
     for (int i = 0; i <= count; ++i)
     {
         double time = i * 0.01;
-        TagsInArea list{GetTagsInArea(time, variables_for_time.time_enter, variables_for_time.time_exit, list_of_tags, num_rounds_per_tag)};
+        TagsInArea list{GetTagsInArea(
+                                                time, variables_for_time.time_enter,variables_for_time.time_exit,
+                                                list_of_tags,
+                                                num_rounds_per_tag)};
 
         for (int v : list.tags_in_area)
             std::cout << v << " ";
