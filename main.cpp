@@ -1,5 +1,6 @@
 #include <iostream>
 #include <vector>
+#include <random>
 #include <list>
 #include "variables.h"
 #include "inderectVariables.h"
@@ -42,6 +43,64 @@ TagsInArea GetTagsInArea(double time, std::vector<double> time_enter, std::vecto
     return list;
 }
 
+struct Rn16Transmission
+{
+    float time;
+    bool last_event_is_success;
+};
+
+Rn16Transmission SimulateRn16Transmission(float time, float probability_success_message,
+                                          float duration_event_success,
+                                          float duration_event_invalid)
+{
+    std::random_device rnd;
+    std::mt19937 gen(rnd());
+    std::uniform_real_distribution<> dis(0,1.0);
+    Rn16Transmission variable{};
+    variable.time = time;
+
+    if (dis(gen) < probability_success_message)
+    {
+        variable.time += duration_event_success;
+        variable.last_event_is_success = true;
+    }
+    else
+    {
+        variable.time += duration_event_invalid;
+        variable.last_event_is_success = false;
+    }
+
+    return variable;
+}
+
+struct IdTransmission
+{
+    bool identified;
+    bool last_event_is_success;
+};
+
+IdTransmission SimulateIdTransmission(bool last_event_success, float probability_success_message,
+                                      bool identified)
+{
+    std::random_device rnd;
+    std::mt19937 gen(rnd());
+    std::uniform_real_distribution<> dis(0,1.0);
+    IdTransmission variable{};
+    variable.last_event_is_success = last_event_success;
+    variable.identified = identified;
+
+    if (dis(gen) < probability_success_message)
+    {
+        variable.identified = true;
+        variable.last_event_is_success = true;
+    }
+    else
+    {
+        variable.last_event_is_success = false;
+    }
+
+    return variable;
+}
 
 int main() {
     VariablesForTimes variables_for_time{GetVariablesForTimes(10)};
@@ -69,6 +128,19 @@ int main() {
             std::cout << v << " ";
         std::cout << "\n";
     }
+
+    IdTransmission tid = SimulateIdTransmission(true, 0.03, false);
+    int count_ = 0;
+    for (int i=0; i < 1000; ++i)
+    {
+        IdTransmission tid = SimulateIdTransmission(true, 0.03, false);
+        if (tid.identified == true)
+        {
+            ++count_;
+        }
+
+    }
+    std::cout << (count_);
 
 
 }
