@@ -153,3 +153,50 @@ double GetTwoRayPathLoss3d(const std::vector<double>& tx_pos,
             std::abs(g0/d0 * std::exp(k1) + r1*g1/d1 * std::exp(k2));
     return result;
 }
+
+double GetPathLossForReader(double x) {
+    std::vector<double> rx_pos = {-x, 0, 0.5};
+    std::vector<double> rx_dir_theta = {1, 0, 0};
+    return GetTwoRayPathLoss3d(position_reader, forward_dir_reader, rx_pos, rx_dir_theta, 0.5);
+}
+
+double GetPathLossForTag(double x) {
+    std::vector<double> tx_pos = {-x, 0, 0.5};
+    std::vector<double> tx_dir_theta = {1, 0, 0};
+    return GetTwoRayPathLoss3d(tx_pos, tx_dir_theta, position_reader, forward_dir_reader, 1);
+}
+
+double GetRxPower(double x, double path_loss,
+                  double tx_power, double cable_loss,
+                  double tag_modulation_loss) {
+
+    std::vector<double> r1;
+    std::vector<double> o1;
+    std::vector<double> r2;
+    std::vector<double> o2;
+
+    double reader_gain = 8.0;
+    double tag_gain = 2.0;
+    double polarization_loss = -3;
+
+    if (cable_loss == -2) {
+        r1 = position_reader;
+        o1 = forward_dir_reader;
+        r2 = {-x, 0, 0.5};
+        o2 = {1, 0, 0};
+    } else {
+        r1 = {-x, 0, 0.5};
+        o1 = {1, 0, 0};
+        r2 = position_reader;
+        o2 = forward_dir_reader;
+    }
+
+    if (GetDotProduct(GetDifferenceVector(r2,r1), o1) < 0
+    || GetDotProduct(GetDifferenceVector(r1,r2), o2) < 0) {
+        return ThermalNoise;
+    }
+   double rx_power = (tx_power + tag_modulation_loss +
+                      cable_loss + reader_gain + path_loss + path_loss +
+                      tag_gain + polarization_loss);
+    return rx_power;
+}
