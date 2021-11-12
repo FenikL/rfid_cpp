@@ -183,7 +183,7 @@ double GetRxPower(double x, double path_loss,
     double tag_gain = 2.0;
     double polarization_loss = -3;
 
-    if (cable_loss == -2) {
+    if (cable_loss == -2.0) {
         r1 = position_reader;
         o1 = forward_dir_reader;
         r2 = {-x, 0, 0.5};

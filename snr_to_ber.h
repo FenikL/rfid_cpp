@@ -1,5 +1,7 @@
 #ifndef RFID_SNR_TO_BER_H
 #define RFID_SNR_TO_BER_H
+#include <vector>
+#include <complex>
 
 std::vector<double> GetDifferenceVector(const std::vector<double>& v1,
                                         const std::vector<double>& v2);

@@ -4,6 +4,7 @@
 #include <list>
 #include "variables.h"
 #include "inderectVariables.h"
+#include "snr_to_ber.h"
 
 
 struct TagsInArea
@@ -141,6 +142,24 @@ int main() {
 
     }
     std::cout << (count_);
+
+    double rx_power, snr;
+    int miller = 1;
+    VariablesFromTari val_tari = GetVariablesFromTari(6.25);
+    Preamble preamble = GetPreamble(6.25, val_tari.rtcal,
+                                    val_tari.trcal,
+                                    0, miller);
+    Bitrate bitrate = GetBitrate(val_tari.rtcal, val_tari.blf, miller);
+    double preamble_duration = preamble.tag_length / bitrate.tag;
+    std::cout << "BER" << "\n";
+    for (double i=1; i<14; ++i) {
+        std::cout << i << "\n";
+        rx_power = GetTagPower(i);
+        std::cout << rx_power << "\n";
+        snr = GetSnr(rx_power, miller, preamble_duration,
+                     val_tari.blf);
+        std::cout << GetBerOverRayleigh(snr) << "\n";
+    }
 
 
 }
