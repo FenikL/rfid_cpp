@@ -66,6 +66,10 @@ double GetWattToDbm(double value_watt) {
     }
 }
 
+double GetDbToLin(double value_db) {
+    return std::pow(10, value_db/10);
+}
+
 double GetLinToDb(double value_linear) {
     if (value_linear >= 1e-15) {
         return 10 * std::log10(value_linear);
@@ -195,8 +199,49 @@ double GetRxPower(double x, double path_loss,
     || GetDotProduct(GetDifferenceVector(r1,r2), o2) < 0) {
         return ThermalNoise;
     }
-   double rx_power = (tx_power + tag_modulation_loss +
+    double rx_power = (tx_power + tag_modulation_loss +
                       cable_loss + reader_gain + path_loss + path_loss +
                       tag_gain + polarization_loss);
     return rx_power;
+}
+
+double GetReaderPower(double x) {
+    double reader_power = GetRxPower(x, GetLinToDb(GetPathLossForReader(x)),
+                                     reader_tx_power,-2.0, 0);
+    return reader_power;
+}
+
+double GetTagPower(double x) {
+    double tx_power = GetReaderPower(x);
+    double tag_power = GetRxPower(x, GetLinToDb(GetPathLossForTag(x)),
+                                  tx_power, 0, -10);
+    return tag_power;
+}
+
+double GetSignalToNoise(double rx_power, double noise_power) {
+    return GetDbToLin(rx_power - noise_power);
+}
+
+double GetSyncAngle(double snr, double preamble_duration) {
+    double bandwidth = 1.2e6;
+    return (1 / std::sqrt(snr*preamble_duration*bandwidth));
+}
+
+double GetSnrExtended(double snr, double sync_phi, int miller, double symbol_duration) {
+    double bandwidth = 1.2e6;
+    return miller * snr * symbol_duration *  bandwidth * std::cos(sync_phi) * std::cos(sync_phi);
+}
+
+double GetSnr(double rx_power, int miller, double preamble_duration, double blf) {
+    double noise = GetDbmToWatt(-80) + GetDbmToWatt(ThermalNoise);
+    noise = GetWattToDbm(noise);
+    double raw_snr = GetSignalToNoise(rx_power, noise);
+    double sync = GetSyncAngle(raw_snr, preamble_duration);
+    double snr = GetSnrExtended(raw_snr, sync, miller, 1/blf);
+    return snr;
+}
+
+double GetBerOverRayleigh(double snr) {
+    double t = std::sqrt(1 + 2/snr);
+    return 0.5 - 1/t + 2*std::atan(t)/(Pi*t);
 }
