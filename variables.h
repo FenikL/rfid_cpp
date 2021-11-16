@@ -3,7 +3,7 @@
 #include <vector>
 
 
-const int NumTags = 30;
+constexpr int NumTags = 30;
 const double Interval = 1.0;
 const double AreaLength = 12.0;
 

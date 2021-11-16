@@ -5,43 +5,37 @@
 #include "variables.h"
 #include "inderectVariables.h"
 #include "snr_to_ber.h"
+#include <chrono>
 
 
-struct TagsInArea
+std::vector<int> GetTagsInArea(double time, const std::vector<double>& time_enter, const std::vector<double>& time_exit,
+                         std::list<int>& list_of_tags, std::vector<int>& num_rounds_per_tag)
 {
-    std::list<int> tags_in_area;
-    std::vector<int> num_rounds_per_tag;
-};
-
-TagsInArea GetTagsInArea(double time, std::vector<double> time_enter, std::vector<double> time_exit,
-                         std::list<int> list_of_tags, std::vector<int> num_rounds_per_tag)
-{
-    TagsInArea list{};
+    std::vector<int> tags_in_area;
+    auto start_time = std::chrono::steady_clock::now();
     bool delete_first = false;
-    for (int tag : list_of_tags)
-    {
-        if (time < time_enter[tag])
-        {
+    for (int tag : list_of_tags) {
+        if (time < time_enter[tag]) {
             break;
         }
 
-        if ((time_enter[tag] <= time) and (time < time_exit[tag]))
-        {
-            list.tags_in_area.push_back(tag);
+        if ((time_enter[tag] <= time) and (time < time_exit[tag])) {
+            tags_in_area.push_back(tag);
             /* std::cout << timeEnter[tag] << "<=" << time << "<" << timeExit[tag] << "\n"; */
-            /* ++list.num_rounds_per_tag[tag]; */
+            ++num_rounds_per_tag[tag];
         }
 
-        if (time >= time_exit[tag])
-        {
+        if (time >= time_exit[tag]) {
             delete_first = true;
         }
     }
-    if (delete_first)
-    {
+    if (delete_first) {
         list_of_tags.pop_front();
     }
-    return list;
+    auto end_time = std::chrono::steady_clock::now();
+    auto elapsed_ns = std::chrono::duration_cast<std::chrono::nanoseconds>(end_time - start_time);
+    std::cout << elapsed_ns.count() << " ns\n";
+    return tags_in_area;
 }
 
 struct Rn16Transmission
@@ -103,6 +97,23 @@ IdTransmission SimulateIdTransmission(bool last_event_success, float probability
     return variable;
 }
 
+double RunModel(double velocity, int q, bool tid, double tari) {
+    for (int _=0; _<NumIterations; ++_) {
+        double time = 0;
+        std::vector<bool> identified_epc(NumTags, false);
+        std::vector<bool> identified_epc_and_tid(NumTags, false);
+        std::vector<int> num_rounds_per_tag(NumTags, 0);
+        std::list<int> list_of_tags;
+        for (int i=0; i<NumTags; ++i) {
+            list_of_tags.push_back(i);
+        }
+        while (time < total_duration) {
+            std::vector<int> tags_in_area = GetTagsInArea(time, time_enter, time_exit, list_of_tags, num_rounds_per_tag);
+
+        }
+    }
+}
+
 int main() {
     VariablesForTimes variables_for_time{GetVariablesForTimes(10)};
 
@@ -114,18 +125,19 @@ int main() {
 
 
     std::vector<int> num_rounds_per_tag(NumTags, 0);
+    std::vector<int> tags_in_area;
 
     double count = variables_for_time.total_duration / 0.01;
 
     for (int i = 0; i <= count; ++i)
     {
         double time = i * 0.01;
-        TagsInArea list{GetTagsInArea(
-                                                time, variables_for_time.time_enter,variables_for_time.time_exit,
-                                                list_of_tags,
-                                                num_rounds_per_tag)};
+        tags_in_area = GetTagsInArea(
+                                    time, variables_for_time.time_enter, variables_for_time.time_exit,
+                                    list_of_tags,
+                                    num_rounds_per_tag);
 
-        for (int v : list.tags_in_area)
+        for (int v : tags_in_area)
             std::cout << v << " ";
         std::cout << "\n";
     }
