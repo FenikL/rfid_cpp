@@ -200,7 +200,7 @@ double GetRxPower(double x, double path_loss,
         return ThermalNoise;
     }
     double rx_power = (tx_power + tag_modulation_loss +
-                      cable_loss + reader_gain + path_loss + path_loss +
+                      cable_loss + reader_gain + path_loss +
                       tag_gain + polarization_loss);
     return rx_power;
 }

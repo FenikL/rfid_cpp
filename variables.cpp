@@ -21,7 +21,7 @@ Bitrate GetBitrate(double rtcal, double blf, int sym_per_bit)
     Bitrate bitrate{};
     bitrate.reader = 2 / rtcal;
     bitrate.tag = blf / sym_per_bit;
-    return {bitrate};
+    return bitrate;
 }
 
 Preamble GetPreamble(double tari, double rtcal, double trcal,

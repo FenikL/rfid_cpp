@@ -115,7 +115,7 @@ int main() {
 
     std::vector<int> num_rounds_per_tag(NumTags, 0);
 
-    int count = variables_for_time.total_duration / 0.01;
+    double count = variables_for_time.total_duration / 0.01;
 
     for (int i = 0; i <= count; ++i)
     {
@@ -135,7 +135,7 @@ int main() {
     for (int i=0; i < 1000; ++i)
     {
         IdTransmission tid = SimulateIdTransmission(true, 0.03, false);
-        if (tid.identified == true)
+        if (tid.identified)
         {
             ++count_;
         }
@@ -151,6 +151,7 @@ int main() {
                                     0, miller);
     Bitrate bitrate = GetBitrate(val_tari.rtcal, val_tari.blf, miller);
     double preamble_duration = preamble.tag_length / bitrate.tag;
+    std::cout << "preamble_duration" << " " << preamble_duration << " " << miller << " " << val_tari.blf << "\n";
     std::cout << "BER" << "\n";
     for (double i=1; i<14; ++i) {
         std::cout << i << "\n";
@@ -161,5 +162,5 @@ int main() {
         std::cout << GetBerOverRayleigh(snr) << "\n";
     }
 
-
+    return 0;
 }
