@@ -6,6 +6,9 @@
 #include "inderectVariables.h"
 #include "snr_to_ber.h"
 #include <chrono>
+#include <cstdlib>
+#include <map>
+#include <ctime>
 
 
 std::vector<int> GetTagsInArea(double time, const std::vector<double>& time_enter, const std::vector<double>& time_exit,
@@ -97,7 +100,25 @@ IdTransmission SimulateIdTransmission(bool last_event_success, float probability
     return variable;
 }
 
+int GetRandomNumber(int max)
+{
+    int num = std::rand() % (max + 1);
+    return num;
+}
+
+double GetPosition(double time, double time_enter, double velocity) {
+    return AreaLength - (time - time_enter) * velocity;
+}
+
+double GetBer(double time, double velocity, double time_enter, int miller, double preamble_duration, double blf) {
+    double x = GetPosition(time, time_enter, velocity);
+    double rx_power = GetTagPower(x);
+    double snr = GetSnr(rx_power, miller, preamble_duration, blf);
+    return GetBerOverRayleigh(snr);
+}
+
 double RunModel(double velocity, int q, bool tid, double tari) {
+    int slot_range = pow(2, q);
     for (int _=0; _<NumIterations; ++_) {
         double time = 0;
         std::vector<bool> identified_epc(NumTags, false);
@@ -109,12 +130,41 @@ double RunModel(double velocity, int q, bool tid, double tari) {
         }
         while (time < total_duration) {
             std::vector<int> tags_in_area = GetTagsInArea(time, time_enter, time_exit, list_of_tags, num_rounds_per_tag);
+            std::map<int, int> tags_slots;
+            for (int tag : tags_in_area) {
+                tags_slots[tag] = GetRandomNumber(slot_range);
+            }
+            int t_round_started = time;
+            time += t_query - t_qrep;
+
+            for (int slot=0; slot<slot_range; ++slot) {
+                std::vector<int> responding_tags;
+                for (int tag : tags_in_area) {
+                    if (tags_slots[tag] == 0) {
+                        responding_tags.push_back(tag);
+                    }
+                }
+                if (responding_tags.size() ==0) {
+                    time += empty_slot;
+                }
+                else if (responding_tags.size() == 1) {
+                    int tag = responding_tags[0];
+                    double x = GetPosition(time, time_enter[tag], velocity);
+                    double rx_power = GetTagPower(x);
+                    double snr = GetSnr(x, miller, preamble_duration, blf);
+                    double ber = GetBerOverRayleigh(snr);
+                    double probability_success_message = GetProbabilitySuccessMessage(ber);
+
+                }
+            }
+
 
         }
     }
 }
 
 int main() {
+    std::srand(std::time(NULL));
     VariablesForTimes variables_for_time{GetVariablesForTimes(10)};
 
     std::list<int> list_of_tags;
@@ -173,6 +223,8 @@ int main() {
                      val_tari.blf);
         std::cout << GetBerOverRayleigh(snr) << "\n";
     }
+    std::cout << "random=" << GetRandomNumber(std::pow(2, 2))<<std::endl;
+    std::cout << "random=" << GetRandomNumber(std::pow(2, 2));
 
     return 0;
 }

@@ -16,29 +16,29 @@ VariablesFromTari GetVariablesFromTari(double tari)
     return variable;
 }
 
-Bitrate GetBitrate(double rtcal, double blf, int sym_per_bit)
+Bitrate GetBitrate(double rtcal, double blf, int miller)
 {
     Bitrate bitrate{};
     bitrate.reader = 2 / rtcal;
-    bitrate.tag = blf / sym_per_bit;
+    bitrate.tag = blf / miller;
     return bitrate;
 }
 
 Preamble GetPreamble(double tari, double rtcal, double trcal,
-                     int trext, int sym_per_bit)
+                     int trext, int miller)
 {
     Preamble preamble{};
     preamble.t_sync = Micro*(12.5 + tari) + rtcal;
     preamble.t_full = preamble.t_sync + trcal;
 
     if (trext == 0) {
-        if (sym_per_bit == 1) {
+        if (miller == 1) {
             preamble.tag_length = 6;
         } else {
             preamble.tag_length = 10;
         }
     } else {
-        if (sym_per_bit == 1) {
+        if (miller == 1) {
             preamble.tag_length = 18;
         } else {
             preamble.tag_length = 22;
@@ -70,15 +70,10 @@ DurationFromTag GetDurationFromTag(double tag_preamble_len, double tag_bitrate)
     return duration;
 }
 
-ProbabilitySuccessMessage GetProbabilitySuccessMessage(double ber)
+double GetProbabilitySuccessMessage(double ber, int length)
 {
     double x = 1 - ber;
-    ProbabilitySuccessMessage probability{};
-    probability.rn16 = pow(x, Rn16Length);
-    probability.new_rn16 = pow(x, NewRn16Length);
-    probability.epcid = pow(x, EpcidLength);
-    probability.tid = pow(x, TidLength);
-    return probability;
+    return pow(x, length);
 }
 
 VariablesForTimes GetVariablesForTimes(double velocity)

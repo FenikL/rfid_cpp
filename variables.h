@@ -61,14 +61,6 @@ struct DurationFromTag
     double tid;
 };
 
-struct ProbabilitySuccessMessage
-{
-    double rn16;
-    double new_rn16;
-    double epcid;
-    double tid;
-};
-
 struct VariablesForTimes
 {
     double total_duration;
@@ -92,7 +84,7 @@ GetDurationFromReader(
         double t_full_preamble,
         double t_sync_preamble);
 DurationFromTag GetDurationFromTag(double tag_preamble_len, double tag_bitrate);
-ProbabilitySuccessMessage GetProbabilitySuccessMessage(double ber);
+double GetProbabilitySuccessMessage(double ber);
 VariablesForTimes GetVariablesForTimes(double velocity);
 
 #endif //RFID_VARIABLES_H
